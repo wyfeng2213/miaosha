@@ -27,6 +27,7 @@ import com.imooc.miaosha.vo.GoodsVo;
 
 /**
  * 商品列表和秒杀倒计时处理
+ * 流程 商品列表-->商品详情 -->秒杀成功-->生成订单 -->订单详情
  */
 @Controller
 @RequestMapping("/goods")

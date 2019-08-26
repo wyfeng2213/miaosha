@@ -38,6 +38,7 @@ import com.imooc.miaosha.vo.GoodsVo;
 
 /**
  * 秒杀业务处理
+ * 流程 商品列表-->商品详情 -->秒杀成功-->生成订单 -->订单详情
  */
 @Controller
 @RequestMapping("/miaosha")
@@ -93,6 +94,7 @@ public class MiaoshaController implements InitializingBean {
 	}
 	
 	/**
+	 * 秒杀请求
 	 * QPS:1306
 	 * 5000 * 10
 	 * QPS: 2114
@@ -113,6 +115,7 @@ public class MiaoshaController implements InitializingBean {
     	}
     	//内存标记，减少redis访问
     	boolean over = localOverMap.get(goodsId);
+    	// 从map中获取 是否已经秒杀失败了
     	if(over) {
     		return Result.error(CodeMsg.MIAO_SHA_OVER);
     	}
@@ -122,7 +125,7 @@ public class MiaoshaController implements InitializingBean {
     		 localOverMap.put(goodsId, true);
     		return Result.error(CodeMsg.MIAO_SHA_OVER);
     	}
-    	//判断是否已经秒杀到了
+    	//判断缓存中 用户是否已经秒杀到了, 不能重复的买第二个
     	MiaoshaOrder order = orderService.getMiaoshaOrderByUserIdGoodsId(user.getId(), goodsId);
     	if(order != null) {
     		return Result.error(CodeMsg.REPEATE_MIAOSHA);
@@ -152,6 +155,7 @@ public class MiaoshaController implements InitializingBean {
     }
     
     /**
+	 * 客户端轮询获取秒杀结果
      * orderId：成功
      * -1：秒杀失败
      * 0： 排队中
@@ -167,7 +171,8 @@ public class MiaoshaController implements InitializingBean {
     	long result  =miaoshaService.getMiaoshaResult(user.getId(), goodsId);
     	return Result.success(result);
     }
-    
+
+    // 访问路径限流
     @AccessLimit(seconds=5, maxCount=5, needLogin=true)
     @RequestMapping(value="/path", method=RequestMethod.GET)
     @ResponseBody

@@ -54,10 +54,13 @@ public class MiaoshaService {
 		if(order != null) {//秒杀成功
 			return order.getOrderId();
 		}else {
+			// 判断缓存中的key是否存在 是否已经卖完了
 			boolean isOver = getGoodsOver(goodsId);
-			if(isOver) {
+			// 如果存在说明还有库存 秒杀失败
+			if(isOver) { // 卖完了 , 返回失败
 				return -1;
 			}else {
+				// 没有卖完 继续轮询 不知道是成功还是失败 , 可能是队列还没处理完,返回排队中
 				return 0;
 			}
 		}
