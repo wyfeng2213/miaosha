@@ -36,6 +36,9 @@ import com.imooc.miaosha.service.MiaoshaUserService;
 import com.imooc.miaosha.service.OrderService;
 import com.imooc.miaosha.vo.GoodsVo;
 
+/**
+ * 秒杀业务处理
+ */
 @Controller
 @RequestMapping("/miaosha")
 public class MiaoshaController implements InitializingBean {

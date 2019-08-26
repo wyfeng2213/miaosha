@@ -118,7 +118,8 @@ public class GoodsController {
     	}
     	return html;
     }
-    
+
+    // 模拟页面静态化的数据请求
     @RequestMapping(value="/detail/{goodsId}")
     @ResponseBody
     public Result<GoodsDetailVo> detail(HttpServletRequest request, HttpServletResponse response, Model model,MiaoshaUser user,
