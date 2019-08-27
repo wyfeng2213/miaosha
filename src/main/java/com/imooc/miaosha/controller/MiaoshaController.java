@@ -108,7 +108,7 @@ public class MiaoshaController implements InitializingBean {
     	if(user == null) {
     		return Result.error(CodeMsg.SESSION_ERROR);
     	}
-    	//验证path
+    	//验证path  隐藏了path ,需要验证
     	boolean check = miaoshaService.checkPath(user, goodsId, path);
     	if(!check){
     		return Result.error(CodeMsg.REQUEST_ILLEGAL);
@@ -172,7 +172,17 @@ public class MiaoshaController implements InitializingBean {
     	return Result.success(result);
     }
 
-    // 访问路径限流
+
+
+	/**
+	 *  // 访问路径限流 , 秒杀接口地址隐藏 , 获取地址
+	 *  // 防刷 需要传入验证码
+	 * @param request
+	 * @param user
+	 * @param goodsId
+	 * @param verifyCode
+	 * @return
+	 */
     @AccessLimit(seconds=5, maxCount=5, needLogin=true)
     @RequestMapping(value="/path", method=RequestMethod.GET)
     @ResponseBody
@@ -190,9 +200,15 @@ public class MiaoshaController implements InitializingBean {
     	String path  =miaoshaService.createMiaoshaPath(user, goodsId);
     	return Result.success(path);
     }
-    
-    
-    @RequestMapping(value="/verifyCode", method=RequestMethod.GET)
+
+	/**
+	 * 验证码生成
+	 * @param response
+	 * @param user
+	 * @param goodsId
+	 * @return
+	 */
+	@RequestMapping(value="/verifyCode", method=RequestMethod.GET)
     @ResponseBody
     public Result<String> getMiaoshaVerifyCod(HttpServletResponse response,MiaoshaUser user,
     		@RequestParam("goodsId")long goodsId) {
@@ -205,6 +221,8 @@ public class MiaoshaController implements InitializingBean {
     		ImageIO.write(image, "JPEG", out);
     		out.flush();
     		out.close();
+    		//前端处理
+    		//$("#verifyCodeImg").attr("src", "/miaosha/verifyCode?goodsId="+$("#goodsId").val());
     		return null;
     	}catch(Exception e) {
     		e.printStackTrace();

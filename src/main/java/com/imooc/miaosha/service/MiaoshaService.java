@@ -91,11 +91,19 @@ public class MiaoshaService {
 		if(user == null || goodsId <=0) {
 			return null;
 		}
-		String str = MD5Util.md5(UUIDUtil.uuid()+"123456");
-    	redisService.set(MiaoshaKey.getMiaoshaPath, ""+user.getId() + "_"+ goodsId, str);
-		return str;
+		// 生成随机数 作为地址
+		String path = MD5Util.md5(UUIDUtil.uuid()+"123456");
+		// 存放到redis中 , 根据用户和商品id作为key
+    	redisService.set(MiaoshaKey.getMiaoshaPath, ""+user.getId() + "_"+ goodsId, path);
+		return path;
 	}
 
+	/**
+	 * 创建验证码
+	 * @param user
+	 * @param goodsId
+	 * @return
+	 */
 	public BufferedImage createVerifyCode(MiaoshaUser user, long goodsId) {
 		if(user == null || goodsId <=0) {
 			return null;
@@ -132,6 +140,13 @@ public class MiaoshaService {
 		return image;
 	}
 
+	/**
+	 * 检验验证码
+	 * @param user
+	 * @param goodsId
+	 * @param verifyCode
+	 * @return
+	 */
 	public boolean checkVerifyCode(MiaoshaUser user, long goodsId, int verifyCode) {
 		if(user == null || goodsId <=0) {
 			return false;
@@ -157,6 +172,7 @@ public class MiaoshaService {
 
 	private static char[] ops = new char[] {'+', '-', '*'};
 	/**
+	 * 表达式操作
 	 * + - * 
 	 * */
 	private String generateVerifyCode(Random rdm) {
