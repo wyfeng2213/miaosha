@@ -34,6 +34,7 @@ public class AccessInterceptor  extends HandlerInterceptorAdapter{
 			throws Exception {
 		if(handler instanceof HandlerMethod) {
 			MiaoshaUser user = getUser(request, response);
+			// 使用到threadlocal 放到当前线程里面来
 			UserContext.setUser(user);
 			HandlerMethod hm = (HandlerMethod)handler;
 			AccessLimit accessLimit = hm.getMethodAnnotation(AccessLimit.class);
@@ -43,22 +44,22 @@ public class AccessInterceptor  extends HandlerInterceptorAdapter{
 			int seconds = accessLimit.seconds();
 			int maxCount = accessLimit.maxCount();
 			boolean needLogin = accessLimit.needLogin();
-			String key = request.getRequestURI();
+			String url = request.getRequestURI();
 			if(needLogin) {
 				if(user == null) {
 					render(response, CodeMsg.SESSION_ERROR);
 					return false;
 				}
-				key += "_" + user.getId();
+				url += "_" + user.getId();
 			}else {
 				//do nothing
 			}
 			AccessKey ak = AccessKey.withExpire(seconds);
-			Integer count = redisService.get(ak, key, Integer.class);
+			Integer count = redisService.get(ak, url, Integer.class);
 	    	if(count  == null) {
-	    		 redisService.set(ak, key, 1);
-	    	}else if(count < maxCount) {
-	    		 redisService.incr(ak, key);
+	    		 redisService.set(ak, url, 1);
+	    	}else if(count < maxCount) { // 小于最大的次数
+	    		 redisService.incr(ak, url);
 	    	}else {
 	    		render(response, CodeMsg.ACCESS_LIMIT_REACHED);
 	    		return false;
